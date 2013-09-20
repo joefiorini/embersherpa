@@ -7,56 +7,63 @@ author: tarasm
 date: 2013-09-11 15:00
 Table of Contents: 
   Introduction: "#introduction"
-  Get the code: "#get-the-code"
   Routes: "#routes"
   Models: "#models"
   Controllers: "#controllers"
   Persistence Layer: "#persistence-layer"
   Injections: "#injections"
+  Get the code: "#get-the-code"  
 Links:
   Ember Inspector: "https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi"
   Ember Data: "https://github.com/emberjs/data"
   Ember Model: "https://github.com/ebryn/ember-model"
   EPF: "http://epf.io/"
 ---
-<span id="introduction"></span>When I started learning Ember.js, I spent a lot of time trying different persistence libraries. In the process, I tried *Ember Data*<span class="small"> (at the time it was at Revision 13),</span> *Ember Model* and *EPF*. Without a solid understanding of the Ember architecture it was difficult to tell where Ember stopped and the persistence library began. When something wasn't working, I couldn't be sure if my code had a bug, if I was using the library incorrectly or if there was a bug in the library that I was using. I decided that the best way for me to learn was to create a simple CRUD app and roll my own persistence layer. 
+<span id="introduction"></span>*Ember Data* is one of the most ambitious undertakings in recent JavaScript history. It carries the promise of a persistance library that makes it easy to build large browser applications that interact with diverse APIs. *Ember Data* is evolving quickly as the Ember Core Team experiments and iterates the library to create a generalized solution that will work for many use cases. These changes introduce code with kinks that haven't been ironed out yet. When using *Ember Data* developers often find themselves digging into the library to look where the problem originates.
+
+Digging into *Ember Data* source code is easier for experienced Ember developers who are familiar with *Ember Data*'s history and Ember community. For a beginner, who is building a small browser app this can be extremely frustrating because its difficult to find the source of the problem. Innevitably, beginners waste days trying to figure out how to get their apps to make simple requests to their non conventional APIs. 
+
+This article was written as an alternative to that experience. The goal of this article is to help you undestand Ember architecture and allow you to buid simple apps without relying on *Ember Data*.
+
+There will come a day when *Ember Data* is a rock solid library that is easier to use than writing your own AJAX requests. Until that day, learn Ember architecture and roll your own persistance layer. This will give you the added bonus of understanding how *Ember Data* ties into *Ember* and what problems it tries to solve for you. 
+
+<span id="application"></span>
+### Application
 
 The Ember CRUD Example app does basic CRUD functionality and stores the created entries in HTML5 localStorage. This app is **work in progress** and I intend to improve it over time. You can checkout the <a href="https://github.com/taras/ember-crud-example#todo" target="_blank">TODOs</a> to see what's completed.
 
 <div class="btn-group mbl mtm"><a href="app/" class="btn btn-success">Try the app</a><a href="app/tests/" class="btn btn-info">Run tests</a><a class="btn btn-warning" href="https://github.com/taras/ember-crud-example#todo" target="_blank">TODOs</a></div>
 
-<span id="start"></span>
-### Get the code
+Create an app instance and configure it to log information 
 
-<div class="dialog dialog-info">The example app is based on *Ember App Kit*. Read <a href="/articles/introduction-to-ember-app-kit">introduction to Ember App Kit</a> if you're not familiar with the tools that it provides.</div>
+```
+// log binding activities
+Ember.LOG_BINDINGS = true;
 
-To start, 
-
-1. fork the [Ember CRUD Example](https://github.com/taras/ember-crud-example) repository on GitHub
-2. clone your fork to your computer
-3. in your working directory
-  1. install Node.js modules with ```npm install``` ( assuming you have npm installed, if not [Introduction to npm](http://howtonode.org/introduction-to-npm) )
-  2. install Bower components with ```bower install``` ( assuming you have bower installed, if not ```npm install -g bower```)
-  3. install Grunt with ```npm install -g grunt-cli``` if you don't already have it installed
-4. Verify that everything works
-  1. start the dev server with ```grunt server```
-  2. go to <a href="http://localhost:8000" target="_blank">http://localhost:8000</a>
-  3. your app should look like the <a href="app/index.html">demo</a>
+var App = Ember.Application.create({
+  // log when Ember generates a controller or a route from a generic class
+  LOG_ACTIVE_GENERATION: true,
+  // log when Ember looks up a template or a view
+  LOG_VIEW_LOOKUPS: true, 
+  // render the application in jQuery("#ember-crud-example")
+  rootElement: "#ember-crud-example"
+});
+```
 
 <span id="routes"></span>
 ### Routes
 
 <div class="dialog dialog-info">If you're not sure where to start planning your application, start with routes.</div>
 
-Routes are the entry point to your application. The example app allows the user to upload photos and add title and description to each photo. So we start with urls where the user will be able to perform these actions.
+Routes are the entry point to your application. The example app allows the user to upload photos and add title and description to each photo. So we start with urls where the user will be perform these actions.
 
-* **/** - root of the application
 * **/photos/** - show a list of photos
-* **/photos/new** - add a new photo
+* **/photos/new** - create a new photo
 * **/photo/:id** - see an existing photo
 * **/photo/:id/edit** - edit an existing photo
+* **/** - root of the application
 
-Ember App Kit has a separate file where the routes are defined, look in **/app/routes.js**.
+
 
 Ember has two different kinds of routes: resources and nested routes. Resources can nest other resources and routes, and are added with ```this.resource( name, options, fn )```. In the example app, **photos** and **photo** are resources. Nested routes are nested into resources and are added with ```this.route( name, options )```. Nested resources **can not** have other resources or endpoints under them. 
 
@@ -129,3 +136,18 @@ Storage object is injected into every route and controller and is available usin
 <span id="injections"></span>
 ### Injections
 
+<span id="start"></span>
+### Get the code
+
+<div class="dialog dialog-info">The example app is based on *Ember App Kit*. Read <a href="/articles/introduction-to-ember-app-kit">introduction to Ember App Kit</a> if you're not familiar with the tools that it provides.</div>
+
+1. fork the [Ember CRUD Example](https://github.com/taras/ember-crud-example) repository on GitHub
+2. clone your fork to your computer
+3. in your working directory
+  1. install Node.js modules with ```npm install``` ( assuming you have npm installed, if not [Introduction to npm](http://howtonode.org/introduction-to-npm) )
+  2. install Bower components with ```bower install``` ( assuming you have bower installed, if not ```npm install -g bower```)
+  3. install Grunt with ```npm install -g grunt-cli``` if you don't already have it installed
+4. Verify that everything works
+  1. start the dev server with ```grunt server```
+  2. go to <a href="http://localhost:8000" target="_blank">http://localhost:8000</a>
+  3. your app should look like the <a href="app/index.html">demo</a>
